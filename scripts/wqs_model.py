@@ -140,7 +140,7 @@ def main():
 
     if args.smoke:
         with model:
-            pm.sample_prior_predictive(samples=50, random_seed=42)
+            pm.sample_prior_predictive(draws=50, random_seed=42)
             idata = pm.sample(draws=50, tune=50, chains=2, cores=1,
                               random_seed=42, progressbar=False)
         print("\nSMOKE OK — model compiles and samples.")

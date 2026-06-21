@@ -50,6 +50,8 @@ intervals (the burden split), `b1` per domain (which abilities), and `theta`
 python scripts/wqs_model.py --smoke   # compile + prior-predictive + tiny sample
 python scripts/wqs_model.py --fit      # full NUTS -> data/model/wqs_idata.nc
 ```
-> Windows note: PyMC/PyTensor needs a C/C++ compiler (g++) for fast sampling.
-> If compilation is unavailable it falls back to slow Python evaluation; install
-> `m2w64-toolchain` (conda) or use WSL for production runs.
+> Verified: `--smoke` compiles, prior-samples and NUTS-samples cleanly on this
+> host (PyMC 6.0.1). No C compiler (`g++`) is installed, so PyTensor uses its
+> NumPy backend — at this model size that is fine (the smoke sample took ~2s).
+> For large production runs, installing `m2w64-toolchain` (conda) or using WSL
+> would speed sampling further.
