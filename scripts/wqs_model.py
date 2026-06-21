@@ -54,11 +54,16 @@ CONFOUNDERS = [
     "eth_Konkomba/Basare", "eth_Gonja/Dagomba/Mamprusi", "eth_Mo",
     "eth_Akan", "eth_Other",
 ]
-MEDLEV = "medlev_ord_imp"   # TODO: switch to in-model imputation of medlev_ord (NaN-preserving)
+MEDLEV = "medlev_ord"   # NaN-preserving ordinal score (1,2,3); imputed IN-MODEL
 
 
 def load_train():
-    """Return arrays + the train standardisation stats (for back-transform)."""
+    """Return arrays + the train standardisation stats (for back-transform).
+
+    medlev is the NaN-preserving ordinal score and is imputed inside the model
+    (see build_model); only the OBSERVED mean is precomputed, as a fixed
+    centring constant.
+    """
     df = pd.read_csv(PREP / "train.csv")
     q = df[BANDS].to_numpy(float)                       # (N, 3) bands 0..3
 
@@ -66,15 +71,13 @@ def load_train():
     y_mean, y_sd = y_raw.mean(0), y_raw.std(0, ddof=0)
     y = (y_raw - y_mean) / y_sd                         # standardised outcomes
 
-    medlev = df[MEDLEV].to_numpy(float)
-    medlev_c = medlev - medlev.mean()                   # centre for clean main/interaction split
+    X = df[CONFOUNDERS].to_numpy(float)                 # (N, P) -- medlev NOT folded in
+    medlev = df[MEDLEV].to_numpy(float)                 # (N,) with np.nan for 43.5% missing
+    medlev_mean = float(np.nanmean(medlev))             # fixed centring constant (observed only)
 
-    # Confounder matrix; fold the centred medlev main effect in as a column.
-    X = df[CONFOUNDERS].to_numpy(float)
-    X = np.column_stack([X, medlev_c])                  # (N, P+1)
-    conf_names = CONFOUNDERS + ["medlev_c"]
-
-    return dict(q=q, y=y, medlev_c=medlev_c, X=X, conf_names=conf_names,
+    return dict(q=q, y=y, X=X, conf_names=list(CONFOUNDERS),
+                medlev=medlev, medlev_mean=medlev_mean,
+                n_missing=int(np.isnan(medlev).sum()),
                 y_mean=y_mean, y_sd=y_sd, N=len(df))
 
 
@@ -91,8 +94,21 @@ def build_model(data):
     with pm.Model(coords=coords) as model:
         q = pm.Data("q", data["q"], dims=("obs", "window"))
         Xc = pm.Data("X", data["X"], dims=("obs", "conf"))
-        mod = pm.Data("medlev_c", data["medlev_c"], dims="obs")
         Y = pm.Data("Y", data["y"], dims=("obs", "domain"))
+
+        # --- in-model imputation of medlev (SES) ---------------------------
+        # medlev is modelled jointly: an imputation submodel regresses the
+        # ordinal SES score on the other covariates, the 43.5% missing entries
+        # become latent (NUTS-sampled) draws from that submodel, and that
+        # uncertainty flows straight into the interaction below. The observed
+        # entries also inform the submodel (a proper joint likelihood).
+        a0 = pm.Normal("imp_a0", 2.0, 1.0)                       # ~mean of a 1-3 score
+        a_imp = pm.Normal("imp_a", 0.0, 1.0, dims="conf")
+        sigma_med = pm.HalfNormal("imp_sigma", 1.0)
+        mu_med = a0 + pt.dot(Xc, a_imp)
+        # observed has np.nan -> PyMC creates medlev_unobserved (latent) + medlev_observed
+        medlev_full = pm.Normal("medlev", mu_med, sigma_med, observed=data["medlev"])
+        medlev_c = pm.Deterministic("medlev_c", medlev_full - data["medlev_mean"], dims="obs")
 
         # --- WQS simplex weights (shared across domains) ---
         w = pm.Dirichlet("w", a=np.ones(3), dims="window")
@@ -102,12 +118,14 @@ def build_model(data):
         b0 = pm.Normal("b0", 0.0, 1.0, dims="domain")
         b1 = pm.Normal("b1", 0.0, 1.0, dims="domain")           # burden effect
         theta = pm.Normal("theta", 0.0, 0.5, dims="domain")     # interaction (tighter)
+        b_med = pm.Normal("b_med", 0.0, 1.0, dims="domain")     # medlev main effect
         gamma = pm.Normal("gamma", 0.0, 1.0, dims=("conf", "domain"))
 
         mu = (
             b0
             + BI[:, None] * b1
-            + (BI * mod)[:, None] * theta
+            + (BI * medlev_c)[:, None] * theta
+            + medlev_c[:, None] * b_med
             + pt.dot(Xc, gamma)
         )
 
@@ -135,7 +153,9 @@ def main():
     import arviz as az
 
     data = load_train()
-    print(f"Train: N={data['N']}, {len(OUTCOMES)} domains, {data['X'].shape[1]} adjustment cols")
+    print(f"Train: N={data['N']}, {len(OUTCOMES)} domains, {data['X'].shape[1]} confounders; "
+          f"medlev imputed in-model ({data['n_missing']}/{data['N']} = "
+          f"{data['n_missing']/data['N']:.0%} missing)")
     model = build_model(data)
 
     if args.smoke:
