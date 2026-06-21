@@ -1,0 +1,168 @@
+===============================================================
+PROJECT UPDATE & QUESTIONS — PM2.5 / Child Cognition Study
+===============================================================
+
+Hi Nana,
+
+Here is a full update on the analysis: what I did from start to finish,
+where things stand now, and the questions I need your help with before
+we can go further. I've tried to keep it plain.
+
+
+---------------------------------------------------------------
+PART 1: WHAT I DID, START TO FINISH
+---------------------------------------------------------------
+
+1. Received your data (400 children, 34 columns) and the data
+   dictionary, and set up a shared, version-controlled project so all
+   the code and steps are tracked and fully reproducible.
+
+2. Explored the data in detail — every variable: its distribution,
+   how much was missing, and any impossible/odd values.
+
+3. Sorted all variables by the role they play in the analysis:
+   - the cognitive outcomes (the KABC ability scores),
+   - the pollution exposures (PM2.5 prenatal, age 1, age 4),
+   - background factors to adjust for (mother's age, education,
+     ethnicity, marital status, child sex),
+   - the "fairness" factor we want to test (mother's education / SES),
+   - and variables that must be LEFT OUT because they happen as a
+     RESULT of pollution (e.g. birthweight, child growth) — including
+     these would hide the very effect we're trying to measure.
+
+4. Cleaned the data and split it into three parts — a training set
+   (to build the model), plus validation and test sets that I held
+   back untouched to check the model honestly. I was careful that no
+   information leaked between them.
+
+5. Built the planned model (a Bayesian "Weighted Quantile Sum" burden
+   index). In plain terms, it:
+   - combines the three pollution time-points into ONE burden score
+     per child, letting the data decide how much each time-point counts,
+   - links that score to FOUR cognitive abilities at the same time,
+   - adjusts for the background factors,
+   - and tests whether pollution harms poorer children more.
+   It also handles the large amount of missing education data properly,
+   building that uncertainty into the results rather than guessing.
+
+6. Ran the model, ran the full set of technical health checks, and
+   tested its predictions on the held-back validation and test children.
+
+
+---------------------------------------------------------------
+PART 2: WHERE WE ARE NOW
+---------------------------------------------------------------
+
+THE GOOD NEWS (the method works):
+- The statistical engine runs correctly and passed every technical
+  reliability check. The model itself is sound and reusable.
+
+THE HONEST NEWS (what the data can currently tell us):
+- Right now the model can barely predict a child's cognitive scores
+  from pollution + background factors — the signal is very weak.
+- The one association that stands out is a SMALL link between higher
+  early-life pollution and LOWER fluid reasoning (problem-solving
+  ability). Everything else is inconclusive.
+- We CANNOT yet say which life-stage (womb vs age 1 vs age 4) matters
+  most, and we cannot yet answer the fairness question.
+
+THE MAIN REASON — and this is the most important point:
+- In the pollution data, one single exact value repeats for a very
+  large share of children:
+     * prenatal PM2.5 = 61.30 for about 38% of children
+     * PM2.5 at age 1 = 54.80 for about 45% of children
+     * PM2.5 at age 4 = 64.13 for about 18% of children
+  This strongly suggests that missing pollution readings were filled
+  in with a single average value. If so, that "filled-in" value carries
+  no real information, which is exactly why the model can't tell which
+  time-window matters. Until this is clarified, the burden index can't
+  do the job the study is designed for.
+
+So the next step depends mostly on your answers below — especially
+about the pollution data.
+
+
+---------------------------------------------------------------
+PART 3: QUESTIONS I NEED YOU TO ANSWER
+---------------------------------------------------------------
+
+** MOST IMPORTANT **
+
+Q1. The repeated PM2.5 values (61.30, 54.80, 64.13 above): were missing
+    pollution readings filled in with an average? If yes —
+    (a) can you share the ORIGINAL values before any filling-in, and
+    (b) can you tell us which children had real measurements vs
+        filled-in ones?
+
+Q2. The data dictionary describes 5 cognitive abilities, but the data
+    only contains 4. The "Knowledge / Gc" domain (Verbal Knowledge &
+    Riddles) is missing. Can you provide the Gc scores, or confirm they
+    were not collected?
+
+Q3. Mother's education is missing for about 44% of children. Is more of
+    this available, or is this the final dataset? (This variable is
+    central to the "does pollution harm poorer children more?" question.)
+
+
+** ABOUT THE POLLUTION DATA **
+
+Q4. How was PM2.5 measured — a personal monitor on the child/mother, an
+    estimate for their home/residence, or an average for their area or
+    district?
+
+Q5. Is each PM2.5 value a single reading or an average over a period?
+    And was the same method used for all three time-points (prenatal,
+    age 1, age 4)?
+
+Q6. What exactly is the "Early_life_PM25" column? It does not match the
+    average of the three windows — how was it calculated?
+
+
+** ABOUT THE COGNITIVE SCORES **
+
+Q7. Are the KABC ability scores already age-standardized (normed for
+    age), or are they raw scores? (If raw, we must adjust for age.)
+
+Q8. Is "FCI_score" the official overall composite of the abilities?
+
+
+** ABOUT OTHER VARIABLES **
+
+Q9. The "smoking now" column is "No" for every single child. Was
+    smoking-in-pregnancy genuinely zero for all, or was it simply not
+    recorded properly?
+
+Q10. Please confirm which variables happen AS A RESULT of pollution, so
+     we correctly keep them out of the adjustment: birthweight,
+     gestational age, delivery type (normal/CS), and child growth
+     measures (height, head circumference, arm measures). Is that right?
+
+Q11. The "gageanc" column has the value 99 for a couple of records — is
+     99 a code for "missing/unknown"?
+
+
+** ABOUT THE STUDY DESIGN **
+
+Q12. Are these 400 children everyone who completed the assessment, or
+     were there dropouts between the time-points? If there were
+     dropouts, was there any pattern to who left (e.g. poorer families)?
+
+Q13. What is the MAIN goal you care about most:
+     (a) the single burden index (one pollution score per child),
+     (b) the critical window (when pollution matters most), or
+     (c) the fairness/equity angle (whose children are most affected)?
+     This decides which version of the model we lead with.
+
+
+** MINOR DATA FLAGS (probably just need confirming) **
+
+- A few children show a height at age 4 of about 193–196 cm, which is
+  impossible for a 4-year-old — likely typing errors.
+- Some columns appear twice in the file (a few cognitive-score and
+  height columns are duplicated). Not a problem, just noting it.
+
+
+---------------------------------------------------------------
+Thanks — once I hear back, especially on Q1–Q3, I can move the
+analysis forward properly.
+===============================================================
