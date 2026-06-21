@@ -67,19 +67,32 @@ THE HONEST NEWS (what the data can currently tell us):
   most, and we cannot yet answer the fairness question.
 
 THE MAIN REASON — and this is the most important point:
-- In the pollution data, one single exact value repeats for a very
-  large share of children:
+- You mentioned the PM2.5 was tagged to each individual household
+  (not an area/district average). That's genuinely good — it means the
+  REAL readings are high quality, and for those children we can trust
+  the exposure. So that part is fine.
+- HOWEVER, that does not explain a separate problem: one single exact
+  value repeats for a very large share of children:
      * prenatal PM2.5 = 61.30 for about 38% of children
-     * PM2.5 at age 1 = 54.80 for about 45% of children
+     * PM2.5 at age 1 = 54.80 for about 43% of children
      * PM2.5 at age 4 = 64.13 for about 18% of children
-  This strongly suggests that missing pollution readings were filled
-  in with a single average value. If so, that "filled-in" value carries
-  no real information, which is exactly why the model can't tell which
-  time-window matters. Until this is clarified, the burden index can't
-  do the job the study is designed for.
+- Genuine per-household values would not land on the SAME number to two
+  decimal places for ~40% of households. And here is the tell-tale sign:
+  that repeated value is almost exactly the MEDIAN of all the other
+  (real) values —
+     * prenatal: repeated 61.30  vs  median of the rest 61.15
+     * age 1:    repeated 54.80  vs  median of the rest 54.92
+  That is the classic fingerprint of MISSING readings being filled in
+  with the median value. (About 91 children carry the filled value in
+  two of the three windows, so it looks like per-window filling.)
+- A filled-in value carries no real information, which is exactly why
+  the model currently can't tell which time-window matters. Until this
+  is clarified, the burden index can't do the job the study is designed
+  for.
 
 So the next step depends mostly on your answers below — especially
-about the pollution data.
+about which pollution values are real household readings versus
+filled-in ones.
 
 
 ---------------------------------------------------------------
@@ -88,11 +101,15 @@ PART 3: QUESTIONS I NEED YOU TO ANSWER
 
 ** MOST IMPORTANT **
 
-Q1. The repeated PM2.5 values (61.30, 54.80, 64.13 above): were missing
-    pollution readings filled in with an average? If yes —
-    (a) can you share the ORIGINAL values before any filling-in, and
-    (b) can you tell us which children had real measurements vs
-        filled-in ones?
+Q1. You said PM2.5 was tagged to each household — that's great. But about
+    40% of children still share one identical value per window, and that
+    value is almost exactly the median of all the real values (see Part 2).
+    That points to missing household readings being filled in with the
+    median. Can you confirm whether that's what happened, and —
+    (a) share the ORIGINAL values before any filling-in, and
+    (b) flag which children had a real household reading vs a filled-in one?
+    (Even just a yes/no "this child's PM2.5 was measured vs filled" column
+     for each window would let us handle it correctly.)
 
 Q2. The data dictionary describes 5 cognitive abilities, but the data
     only contains 4. The "Knowledge / Gc" domain (Verbal Knowledge &
@@ -106,9 +123,9 @@ Q3. Mother's education is missing for about 44% of children. Is more of
 
 ** ABOUT THE POLLUTION DATA **
 
-Q4. How was PM2.5 measured — a personal monitor on the child/mother, an
-    estimate for their home/residence, or an average for their area or
-    district?
+Q4. Since the PM2.5 is tagged per household: was each household's value
+    directly MEASURED (a monitor at or near the home) or MODELLED/estimated
+    (e.g. from a satellite or pollution model at the home's location)?
 
 Q5. Is each PM2.5 value a single reading or an average over a period?
     And was the same method used for all three time-points (prenatal,

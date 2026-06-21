@@ -93,9 +93,12 @@ structure.
   job the title promises.
 
 ## 5. Recommended next steps (in priority order)
-1. **Resolve the exposure tie-spikes with Nana Yaw** — obtain un-imputed PM2.5 or
-   model the measurement error/missingness explicitly. Nothing about the windows
-   is interpretable until then.
+1. **Resolve the exposure tie-spikes with Nana Yaw** — the repeated value ≈ the
+   median of the observed values (median-imputation of missing readings).
+   Exposure is tagged per-household (good — the genuine values are reliable and
+   need no measurement-error layer), but the ~40% median-filled values carry no
+   information. Obtain the un-imputed PM2.5 or a measured-vs-filled flag per
+   window. Nothing about the windows is interpretable until then.
 2. **Confirm Gc** — recover the missing 5th CHC domain if it exists.
 3. Re-fit once exposure is fixed; only then revisit the critical-window and
    environmental-justice questions.

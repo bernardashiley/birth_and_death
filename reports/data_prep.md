@@ -7,14 +7,25 @@ to val/test (no leakage). Fitted parameters are saved to
 `data/prepped/medlev_imputer.joblib`.
 
 ## ⚠️ Headline data-quality finding: exposure tie-spikes
-A single value dominates each early exposure window — almost certainly
-**upstream mean/median imputation of missing PM2.5**:
+A single value dominates each early exposure window — and that value is
+**almost exactly the median of the observed (non-modal) values**, the
+fingerprint of **median-imputation of missing PM2.5**:
 
-| Window | Repeated value | Share of cohort |
-|---|---|---|
-| `PM25_prenatal` | 61.30 | **38%** |
-| `PM25_age1` | 54.80 | **45%** |
-| `PM2.5_age4` | 64.13 | 18% |
+| Window | Repeated value | Share | Median of the rest |
+|---|---|---|---|
+| `PM25_prenatal` | 61.30 | **38%** | 61.15 |
+| `PM25_age1` | 54.80 | **43%** | 54.92 |
+| `PM2.5_age4` | 64.13 | 18% | — |
+
+Note (2026-06): the data owner reports PM2.5 was tagged **per household**
+(not an area average). That is good for the *genuine* readings — they have
+real between-child variation and low measurement error, so the optional
+measurement-error model layer is **not** needed for them. But per-household
+tagging does **not** explain a value repeating to 2 d.p. for ~40% of
+households; the median-match above shows those are filled-in missings.
+Overlap is partial (91 children share the fill in two windows, 11 in all
+three) → per-window filling. Awaiting confirmation + original values /
+a measured-vs-filled flag.
 
 Implications:
 - A 38–45% point-mass **cannot be split into balanced quantile bands** — the
