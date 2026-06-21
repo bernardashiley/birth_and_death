@@ -1,6 +1,11 @@
 # Office temp lock files
 ~$*
 
+# Large posterior artifacts (regenerate via wqs_model.py --fit); keep evaluation.json
+data/model/*.nc
+data/model/*.pkl
+data/model/*.joblib
+
 # Python
 __pycache__/
 *.pyc

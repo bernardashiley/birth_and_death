@@ -1,0 +1,86 @@
+{
+  "diagnostics": {
+    "n_samples": 4000,
+    "max_rhat": 1.0,
+    "min_ess_bulk": 1222,
+    "min_ess_tail": 1548,
+    "divergences": 0,
+    "min_bfmi": 0.783
+  },
+  "train": {
+    "n": 279,
+    "elppd": -1451.4,
+    "rmse_raw": {
+      "Gsm": 9.56,
+      "Gv": 9.93,
+      "Glr": 11.93,
+      "Gf": 6.16
+    },
+    "loo_elpd": -1524.5,
+    "loo_p": 73.1,
+    "loo_se": 33.6,
+    "pareto_k_max": 0.71,
+    "pareto_k_pct_good": 99.6,
+    "elppd_per_obs": -5.202
+  },
+  "val": {
+    "n": 61,
+    "elppd": -316.9,
+    "elppd_per_obs": -5.196,
+    "rmse_sd": {
+      "Gsm": 0.978,
+      "Gv": 0.897,
+      "Glr": 0.949,
+      "Gf": 0.826
+    },
+    "rmse_raw": {
+      "Gsm": 9.62,
+      "Gv": 9.12,
+      "Glr": 11.69,
+      "Gf": 5.25
+    }
+  },
+  "test": {
+    "n": 60,
+    "elppd": -323.5,
+    "elppd_per_obs": -5.391,
+    "rmse_sd": {
+      "Gsm": 0.935,
+      "Gv": 0.983,
+      "Glr": 0.983,
+      "Gf": 1.305
+    },
+    "rmse_raw": {
+      "Gsm": 9.2,
+      "Gv": 9.99,
+      "Glr": 12.11,
+      "Gf": 8.28
+    }
+  },
+  "ppc_train": {
+    "Gsm": {
+      "obs_mean": 0.0,
+      "rep_mean": 0.0,
+      "obs_sd": 1.0,
+      "rep_sd": 1.05
+    },
+    "Gv": {
+      "obs_mean": 0.0,
+      "rep_mean": -0.0,
+      "obs_sd": 1.0,
+      "rep_sd": 1.05
+    },
+    "Glr": {
+      "obs_mean": -0.0,
+      "rep_mean": -0.0,
+      "obs_sd": 1.0,
+      "rep_sd": 1.04
+    },
+    "Gf": {
+      "obs_mean": -0.0,
+      "rep_mean": -0.0,
+      "obs_sd": 1.0,
+      "rep_sd": 1.04
+    }
+  }
+}

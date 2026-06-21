@@ -87,6 +87,7 @@ def build_model(data):
 
     coords = {
         "domain": DOMAIN_LABELS,
+        "domain_b": DOMAIN_LABELS,   # second axis for the 4x4 correlation matrix
         "window": WINDOW_LABELS,
         "conf": data["conf_names"],
         "obs": np.arange(data["N"]),
@@ -134,7 +135,8 @@ def build_model(data):
             "chol", n=len(DOMAIN_LABELS), eta=2.0,
             sd_dist=pm.HalfNormal.dist(1.0), compute_corr=True,
         )
-        pm.Deterministic("corr", corr, dims=("domain", "domain"))
+        pm.Deterministic("corr", corr, dims=("domain", "domain_b"))
+        pm.Deterministic("sds", sds, dims="domain")   # for out-of-sample Sigma reconstruction
 
         pm.MvNormal("Y_obs", mu=mu, chol=chol, observed=Y, dims=("obs", "domain"))
     return model
@@ -171,9 +173,16 @@ def main():
         with model:
             idata = pm.sample(draws=args.draws, tune=args.tune, chains=args.chains,
                               target_accept=0.95, random_seed=42)
-            idata.extend(pm.sample_posterior_predictive(idata, random_seed=42))
-        idata.to_netcdf(OUT / "wqs_idata.nc")
-        print(f"\nSaved posterior -> {OUT / 'wqs_idata.nc'}")
+            pm.sample_posterior_predictive(idata, extend_inferencedata=True,
+                                           random_seed=42)
+        try:
+            idata.to_netcdf(OUT / "wqs_idata.nc", engine="h5netcdf")
+            print(f"\nSaved posterior -> {OUT / 'wqs_idata.nc'}")
+        except Exception as e:  # backend missing -> dependency-free fallback
+            import cloudpickle
+            with open(OUT / "wqs_idata.pkl", "wb") as fh:
+                cloudpickle.dump(idata, fh)
+            print(f"\nnetCDF save failed ({e}); pickled -> {OUT / 'wqs_idata.pkl'}")
         print(az.summary(idata, var_names=["w", "b1", "theta"], round_to=3))
         return
 
